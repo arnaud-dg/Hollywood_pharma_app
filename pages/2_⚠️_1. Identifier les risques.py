@@ -62,9 +62,7 @@ with open("assets/css/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Titre de la page
-st.title("⚠️ Criticité & Risques projets")
-st.markdown(
-    "Découvrez d'autres types de visualisations pour analyser vos données de ventes."
-)
+st.title("⚠️ 1. Evaluer la criticité et identifier les risques projets")
+st.info("Ce module n'est pas traité de façon interactive dans cette application, mais en présentiel.")
 
 

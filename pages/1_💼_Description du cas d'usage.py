@@ -62,57 +62,91 @@ with open("assets/css/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Titre de la page
-st.title("💼 Présentation du cas pratique")
-st.markdown(
-    "Pitch sur le cas pratique de Hollywood pharma"
-)
+st.title("💼 Intro - Description du cas pratique")
 
 st.markdown(""" 
 
-## Contexte
-Hollywood Pharma est un laboratoire pharmaceutique ayant développé une nouvelle forme galénique innovante : la **gomme à mâcher** (chewing-gum médicamenteux), contenant un principe actif révolutionnaire nommé provisoirement **« menthol »**.
+## Première partie : L'entreprise et le produit
 
-## Problématique
-Les produits sont affectés par des **défauts qualité**. Trois types de défauts prédominent :
-1. **Trous** dans la gomme
-2. **Points colorés rouges**
-3. **Défauts d’enrobage**
-
-## Objectif
-Les équipes R&D ont initié un projet d’**intelligence artificielle** pour :
-- Détecter automatiquement les défauts sur ligne de production
-- Effectuer un tri qualité automatisé
-
-## Votre rôle
-Vous intervenez **en tant qu'expert validation IA** :
-- Évaluer les risques liés au déploiement du système
-- Mettre en place des **verrous de sécurité**
-- Garantir les **bonnes pratiques** pour assurer une IA **de confiance**
-
-## Analyse de risque
-Les défauts ont des impacts patients différents :
-- ✅ **Points rouges** : défaut **esthétique** uniquement, sans impact sur la sécurité ou l’efficacité (pigments non toxiques)
-- ⚠️ **Trous et défauts d’enrobage** : peuvent **altérer la cinétique de libération** du principe actif, impactant potentiellement l’**efficacité thérapeutique**
-
+### Hollywood Pharmaceuticals
 """)
 
-# ### Contexte
-# Hollywood Pharma est une entreprise pharmaceutique innovante qui introduit une nouvelle forme galénique, brevetée sous le nom de code « Menthol ». Il s'agit d'un chewing‑gum thérapeutique, pensé pour allier efficacité et praticité.
+col1, col2 = st.columns([2,1])
+with col1:
+    st.image("docs/Hollywood_plant.png", caption="Bâtiment Hollywood Pharmaceuticals")
+with col2:
+    st.image("docs/IMG_0204_orig.jpg", caption="Gomme pharmaceutique")
 
-# ### Enjeux qualité
-# En production, plusieurs défauts visuels affectent les gommes : des trous pouvant perturber la libération du principe actif, un enrobage parfois mal réparti, mais aussi certains points rouges. Ces derniers – bien qu'inesthétiques – ne présentent aucun risque toxique ni impact sur l'efficacité.
+st.markdown("""
+**Une nouvelle forme galénique innovante : « la gomme à mâcher » !**
 
-# ### Solution IA
-# Pour remédier à ces imperfections, l'équipe R&D a conçu un système de vision intelligent capable de détecter automatiquement ces anomalies en temps réel et de trier les gommes, garantissant une qualité constante sans ralentir la chaîne de production.
+- L'entreprise Hollywood Pharmaceuticals souhaite déployer un système d'inspection automatique supporté par l'IA pour contrôler à 100% les unités produites en fin de production primaire.
 
-# ### Rôle expert validation
-# En tant que spécialiste validation, tu prends en charge l'analyse des risques associés à cette IA. Ton objectif est de mettre en place des verrous de sécurité et des bonnes pratiques robustes, permettant d'obtenir un système non seulement performant, mais également conforme aux exigences réglementaires et digne de confiance.
+- Les perspectives de croissance sont phénoménales : 33.0 Md$ à horizon 2032.
 
-# ### Gravité des défauts
-# Seuls deux types de défauts sont critiques. Les trous et les problèmes d'enrobage peuvent modifier la cinétique de libération du principe actif, menaçant directement son efficacité thérapeutique. En revanche, les points rouges sont des défauts purement esthétiques, sans conséquence sur l'action du médicament.
+- L'entreprise est inspectée régulièrement et revendique un environnement GxP.
 
-# ### Objectifs attendus
-# L'ambition est simple : garantir une détection sans faille des défauts critiques, assurer une hiérarchisation des anomalies selon leur gravité, instaurer une traçabilité complète de chaque pièce inspectée, et surveiller en continu la performance de l'IA afin d'anticiper toute dérive.
+---
 
-# ### Résultat escompté
-# L'initiative vise à renforcer la qualité produit de manière tangible, protéger la sécurité des patients en évitant toute altération de l'efficacité, et surtout assurer une intégration réglementaire sereine grâce à une documentation rigoureuse, un contrôle continu et un pilotage qualité adapté.
+## Seconde partie : Le problème métier
+
+### Les défis de l'inspection qualité
+
+L'IA s'avère indispensable pour réaliser cette inspection car les gommes sont des **DIP (« Difficult to Inspect Products »)** en raison de variabilité des pigments. Des recettes articulées sur des règles métiers sont inopérantes.
+
+L'entreprise est confrontée à **3 défauts majeurs** en cours de production :
+""")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.image("docs/IMG_0608.jpg", caption="Bon / *Spot*")
+with col2:
+    st.image("docs/IMG_0523_aug2.jpg", caption="Défaut trou / *Hole*")
+with col3:
+    st.image("docs/IMG_0656_aug2.jpg", caption="Défaut éclat / *Scratch*")
+
+st.markdown("""
+En raison de l'image de marque, le lancement ne doit pas être entaché de problèmes qualité et de réclamations clients. Le procédé doit **limiter le risque** de libérer des unités non conformes.
+
+---
+
+## Troisième partie : L'avis du Data Scientist
+""")
+
+col1, col2 = st.columns([1,2])
+with col1:
+    st.image("docs/data_scientist.gif", caption="What !?!")  
+with col2:        
+    st.markdown("""
+### Les premiers retours de l'équipe de Data Science
+
+- La problématique est une **problématique de classification multiclasses**, l'algorithme va devoir pour chaque image prédire la probabilité d'appartenance aux classes :  
+  « **Good** », « **Hole** », « **Scratch** », « **Spot** »
+
+- Etant donné que les données d'entrées sont des images, il est nécessaire d'utiliser des modèles de type « **réseaux de neurone** » (Deep Learning).
+
+- Des premiers essais ont été réalisés dans le cadre d'une FAT/SAT chez le fabriquant de machine, ce qui a permis de collecter environ **2500 images** et de construire un premier modèle de base en interne.
+""")
+    
+st.markdown("""
+---
+
+## Quatrième partie : Votre rôle
+""")
+
+col1, col2 = st.columns([3,1])
+with col1:
+    st.markdown("""
+### Votre mission en tant que membre de l'équipe AQ
+
+Vous faites partie de l'équipe AQ du site de production. Votre mission est de :
+
+✅ **Garantir la conformité réglementaire** du procédé : s'assurer que le système d'inspection IA respecte les exigences GxP et peut être validé.
+
+✅ **Collaborer avec les Data Scientists** et la Production pour transformer les essais techniques en un système utilisable et validé industriellement. Participer à la **définition des critères d'acceptation**.
+
+✅ Accompagner les équipes techniques dans le développement de la solution IA en **évaluant les risques qualité**. En conséquence, vous devrez **superviser le processus de validation** (plus spécifiquement sur la partie SI) et vous assurer que ce dernier est robuste.
+""")
+with col2:
+    st.image("docs/we_want_you.png", caption="We need you !")
+

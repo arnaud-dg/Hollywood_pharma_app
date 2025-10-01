@@ -71,19 +71,30 @@ if st.session_state.group_choice == "":
     st.warning("⚠️ Veuillez sélectionner un groupe dans la barre latérale pour continuer.")
     st.stop()
 
-# Titre de la page
-st.title("🔎 2. La Qualité des données - Evaluation du jeu de données")
-st.markdown("""
-**Objectifs** : 
+try:
+    with open("assets/css/style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except FileNotFoundError:
+    pass
 
-- La base de donnée servant à entraîner notre IA est constituée d'environ 2.500 images 
+# Titre de la page
+st.title("🔎 2. Evaluer la qualité d'un jeu de données")
+st.markdown("**Objectifs pédagogiques**")
+st.markdown("""
+- Comprendre et réaliser **<span style="color:#7345FF"> l'importance de la qualité des données</span>**.
+- Acquérir une **<span style="color:#7345FF">démarche structurée d'évaluation des risques</span>**.
+""", unsafe_allow_html=True)
+
+st.markdown("**Votre mission**")
+st.markdown("""
+- Les data scientists de votre équipe vous ont préparé un rapide outil pour explorer les caractéristiques du jeu de données.
+- La base de donnée servant à entraîner notre IA est constituée d'environ 2.500 images
 (Un échantillon de 100 images a été sélectionné pour simplifier la démonstration). 
-- Gardez un oeil critique et utilisez votre bon sens pour parcourir ces 100 images à la recherche 
-d'anomalies, de biais ou d'incohérences qui pourraient impacter directement ou indirectement 
+Vous devez vous assurer que les données qui vont être utilisées pour l'entraînement et le test sont appropriées
+- Gardez **<span style="color:#7345FF"> un oeil critique et utilisez votre bon sens</span>** pour parcourir le panel de 100 images à la recherche 
+**<span style="color:#7345FF">d'anomalies</span>**, de **<span style="color:#7345FF">biais</span>** ou **<span style="color:#7345FF">d'incohérences</span>** qui pourraient impacter directement ou indirectement 
 la performance de l'IA.
-            
-Les data scientists de votre équipe vous ont préparé un rapide outil pour explorer les caractéristiques du jeu de données. 
-Voici un aperçu des statistiques clés du jeu de données analysé :""")
+""", unsafe_allow_html=True)
 
 # Fonctions utilitaires
 def image_to_base64_from_bytes(img_bytes):
@@ -365,7 +376,7 @@ def display_sample_images(df):
         cols = st.columns(min(4, len(selected_images)))
         for i, (cat, img) in enumerate(selected_images):
             with cols[i % 4]:
-                st.image(img, caption=cat, use_container_width=True)
+                st.image(img, caption=cat, width='stretch')
 
 def create_intensity_plot(df):
     """Crée un histogramme de distribution de l'intensité moyenne"""

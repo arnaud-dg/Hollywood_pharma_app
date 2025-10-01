@@ -218,7 +218,7 @@ if st.button("Afficher le suivi de tendance du modèle"):
             textposition="top center"
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
         # Affichage des erreurs par dossier
         for folder in subfolders:
@@ -267,7 +267,7 @@ if st.button("Afficher le suivi de tendance du modèle"):
                             if i + j < len(errors):
                                 img_array, true_class, pred_class, confidence, img_name = errors[i + j]
                                 with col:
-                                    st.image(img_array, use_container_width=True)
+                                    st.image(img_array, width='stretch')
                                     st.markdown(
                                         f"<div style='text-align:center'>"
                                         f"<b>Image :</b> {img_name}<br>"
