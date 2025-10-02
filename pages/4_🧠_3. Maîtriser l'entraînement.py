@@ -340,7 +340,7 @@ class StreamlitProgressBar(Callback):
             with self.gif_placeholder.container():
                 col1, col2, col3 = st.columns([1, 1, 1])
                 with col2:
-                    st.image(GIF_PATH, width='stretch')
+                    st.image(GIF_PATH, use_container_width=True)
         
         self.progress_bar = st.progress(0, text="⏳ Entraînement en cours...")
     
@@ -798,7 +798,7 @@ with tab1:
                         file_name = os.path.basename(file_test[idx])
                         
                         with col:
-                            st.image(img, width='stretch')
+                            st.image(img, use_container_width=True)
                             st.markdown(
                                 f"<div style='text-align:center'>"
                                 f"<b>Image :</b> {file_name}<br>"

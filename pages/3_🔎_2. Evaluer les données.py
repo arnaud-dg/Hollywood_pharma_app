@@ -376,7 +376,7 @@ def display_sample_images(df):
         cols = st.columns(min(4, len(selected_images)))
         for i, (cat, img) in enumerate(selected_images):
             with cols[i % 4]:
-                st.image(img, caption=cat, width='stretch')
+                st.image(img, caption=cat, use_container_width=True)
 
 def create_intensity_plot(df):
     """Crée un histogramme de distribution de l'intensité moyenne"""
