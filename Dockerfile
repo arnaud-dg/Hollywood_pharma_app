@@ -1,26 +1,37 @@
-# Image TensorFlow GPU officielle (CUDA et cuDNN inclus)
-FROM tensorflow/tensorflow:2.9.1-gpu
+# Image de base légère
+FROM python:3.10-slim
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier ton projet dans l’image
-COPY . /app
-
-# Installer les bibliothèques système nécessaires pour l'affichage et le rendu
+# Installer dépendances système (OpenCV a besoin de libGL, libglib et autres libs basiques)
 RUN apt-get update && apt-get install -y \
     libgl1 \
+    libglx-mesa0 \
     libglib2.0-0 \
-    fonts-dejavu-core \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Mettre à jour pip
-RUN pip install --upgrade pip
+# Copier uniquement requirements.txt d'abord (optimisation du cache Docker)
+COPY requirements.txt /app/
 
-# Installer les dépendances Python de l'app
+# Mettre à jour pip et installer les dépendances Python
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Exposer le port utilisé par Streamlit
+# Créer les répertoires nécessaires dans le container
+RUN mkdir -p /app/data /app/models /app/logs
+
+# Copier tout ton projet (y compris data, models, logs si dispo localement)
+COPY . /app
+
+# S'assurer que data, models et logs existent (même vides) après COPY
+RUN mkdir -p /app/data /app/models /app/logs
+
+# Exposer le port Streamlit
 EXPOSE 8501
 
 # Commande par défaut pour lancer ton app

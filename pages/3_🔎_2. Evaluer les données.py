@@ -18,12 +18,6 @@ from streamlit.components.v1 import html
 import base64
 import re
 
-# Ajout du chemin racine au path pour pouvoir importer utils et config
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
-from utils import load_data
-from utils_s3 import get_s3_client, get_bucket_name, read_image_from_s3, list_s3_files
-
 # Configuration de la page
 st.set_page_config(page_title="Dataset", page_icon="📊", layout="wide")
 
@@ -54,16 +48,22 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Dropdown avec session_state
+# Initialisation et gestion du groupe
 if "group_choice" not in st.session_state:
     st.session_state.group_choice = ""
 
-group_choice = st.sidebar.selectbox(
+# Récupérer l'index actuel
+current_index = 0
+options = ["", "Grp1", "Grp2", "Grp3", "Grp4", "Grp5", "Grp6", "Grp7"]
+if st.session_state.group_choice in options:
+    current_index = options.index(st.session_state.group_choice)
+
+# Selectbox qui met à jour automatiquement
+st.session_state.group_choice = st.sidebar.selectbox(
     "Sélectionner un groupe",
-    options=["", "Grp1", "Grp2", "Grp3", "Grp4", "Grp5", "Grp6", "Grp7"],
-    index=0 if st.session_state.group_choice == "" else ["", "Grp1", "Grp2", "Grp3", "Grp4", "Grp5", "Grp6", "Grp7"].index(st.session_state.group_choice),
-    help="Veuillez choisir un groupe pour afficher le contenu des pages.",
-    key="group_choice"
+    options=options,
+    index=current_index,
+    help="Veuillez choisir un groupe pour afficher le contenu des pages."
 )
 st.sidebar.markdown("---")
 
@@ -154,40 +154,48 @@ def get_file_hash(content_bytes, algo='sha256'):
         return "NA"
 
 @st.cache_data
-def load_image_dataset_from_s3(s3_prefix="data/dataset_analyze"):
-    """Charge et analyse le jeu de données d'images depuis S3"""
+def load_image_dataset_from_local(data_path="data/dataset_analyze_save"):
+    """Charge et analyse le jeu de données d'images depuis le système de fichiers local"""
     
     image_data = []
     
-    with st.spinner("Chargement et analyse des images depuis S3..."):
-        # Lister tous les fichiers images dans le préfixe
-        all_files = list_s3_files(prefix=s3_prefix)
-        image_files = [f for f in all_files if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    if not os.path.exists(data_path):
+        st.error(f"Le dossier {data_path} n'existe pas")
+        return None
+    
+    with st.spinner("Chargement et analyse des images..."):
+        # Lister tous les fichiers images
+        image_files = []
+        for root, dirs, files in os.walk(data_path):
+            for file in files:
+                if file.lower().endswith(('.jpg', '.jpeg', '.png')):
+                    image_files.append(os.path.join(root, file))
         
         if not image_files:
-            st.error(f"Aucune image trouvée dans s3://{get_bucket_name()}/{s3_prefix}")
+            st.error(f"Aucune image trouvée dans {data_path}")
             return None
         
         progress_bar = st.progress(0)
         total_images = len(image_files)
         
-        for idx, s3_key in enumerate(image_files):
+        for idx, file_path in enumerate(image_files):
             progress_bar.progress((idx + 1) / total_images)
             
             # Extraire les informations du chemin
-            relative_path = s3_key.replace(s3_prefix + "/", "")
-            parts = relative_path.split("/")
+            relative_path = os.path.relpath(file_path, data_path)
+            parts = relative_path.split(os.sep)
             
             label = parts[0] if len(parts) > 0 else "NA"
             defect_type = parts[1] if label == "Defect" and len(parts) > 1 else "NA"
-            file_name = parts[-1]
+            file_name = os.path.basename(file_path)
             
-            # Lire l'image depuis S3
-            img_bytes_io = read_image_from_s3(s3_key)
-            if not img_bytes_io:
+            # Lire l'image
+            try:
+                with open(file_path, 'rb') as f:
+                    img_bytes = f.read()
+            except Exception as e:
+                st.warning(f"Impossible de lire {file_path}: {e}")
                 continue
-            
-            img_bytes = img_bytes_io.read()
             
             # Métadonnées
             w, h, intensity = extract_image_metadata(img_bytes)
@@ -198,7 +206,7 @@ def load_image_dataset_from_s3(s3_prefix="data/dataset_analyze"):
             file_hash = get_file_hash(img_bytes)
             
             image_data.append({
-                "Chemin S3": s3_key,
+                "Chemin": file_path,
                 "Nom fichier": file_name,
                 "Image": img_tag,
                 "Nature": label,
@@ -363,14 +371,12 @@ def display_sample_images(df):
     for cat, sample_name in categories_samples.items():
         matching_rows = df[df["Index"] == sample_name]
         if not matching_rows.empty:
-            s3_key = matching_rows.iloc[0]["Chemin S3"]
-            img_bytes_io = read_image_from_s3(s3_key)
-            if img_bytes_io:
-                try:
-                    img = Image.open(img_bytes_io)
-                    selected_images.append((cat, img))
-                except Exception as e:
-                    st.warning(f"Impossible de charger l'image pour la catégorie {cat}: {e}")
+            file_path = matching_rows.iloc[0]["Chemin"]
+            try:
+                img = Image.open(file_path)
+                selected_images.append((cat, img))
+            except Exception as e:
+                st.warning(f"Impossible de charger l'image pour la catégorie {cat}: {e}")
     
     if selected_images:
         cols = st.columns(min(4, len(selected_images)))
@@ -478,18 +484,18 @@ def create_class_distribution_plot(df):
 
 
 # Chargement automatique des données
-s3_prefix = "data/dataset_analyze"
+data_path = "data/dataset_analyze_save"
 
 # Vérifier si les données sont chargées
 if 'df' not in st.session_state:
-    st.session_state['df'] = load_image_dataset_from_s3(s3_prefix)
+    st.session_state['df'] = load_image_dataset_from_local(data_path)
 
 # Vérifier si les données sont chargées
 if st.session_state['df'] is None:
-    st.error(f"Impossible de charger les données depuis s3://{get_bucket_name()}/{s3_prefix}")
+    st.error(f"Impossible de charger les données depuis {data_path}")
     st.markdown("""
     ### Instructions :
-    1. Assurez-vous que le bucket S3 contient le dossier `data/dataset_analyze`
+    1. Assurez-vous que le dossier `data/dataset_analyze_save` existe
     2. Le dossier doit contenir des sous-dossiers avec vos images (ex: `Good/`, `Defect/`)
     3. Rechargez la page pour relancer l'analyse
     """)
