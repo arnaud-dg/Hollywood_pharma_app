@@ -35,16 +35,22 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Dropdown avec session_state
+# Initialisation et gestion du groupe
 if "group_choice" not in st.session_state:
     st.session_state.group_choice = ""
 
-group_choice = st.sidebar.selectbox(
+# Récupérer l'index actuel
+current_index = 0
+options = ["", "Grp1", "Grp2", "Grp3", "Grp4", "Grp5", "Grp6", "Grp7"]
+if st.session_state.group_choice in options:
+    current_index = options.index(st.session_state.group_choice)
+
+# Selectbox qui met à jour automatiquement
+st.session_state.group_choice = st.sidebar.selectbox(
     "Sélectionner un groupe",
-    options=["", "Grp1", "Grp2", "Grp3", "Grp4", "Grp5", "Grp6", "Grp7"],
-    index=0 if st.session_state.group_choice == "" else ["", "Grp1", "Grp2", "Grp3", "Grp4", "Grp5", "Grp6", "Grp7"].index(st.session_state.group_choice),
-    help="Veuillez choisir un groupe pour afficher le contenu des pages.",
-    key="group_choice"
+    options=options,
+    index=current_index,
+    help="Veuillez choisir un groupe pour afficher le contenu des pages."
 )
 st.sidebar.markdown("---")
 
